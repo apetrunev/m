@@ -1,7 +1,5 @@
 #include "Token.h"
 
-#include <iostream>
-#include <string>
 #include <map>
 
 namespace mumps {
