@@ -13,14 +13,13 @@ int main(int argc, char *argv[])
 	mumps::Routine routine;
 
 	if (argc < 2) { 
-		std::cerr << "./rmumps -s|--source filename\n" 
-				  << "./rmumps filename\n";
+		std::cerr << "./rmumps -s|--source filename\n";
+		std::cerr << "./rmumps filename\n";
 		return -1;
 	}
 
 	for (int i = 1; i < argc; i++) {
-		if (std::string(argv[i]) == "-s" ||
-			std::string(argv[i]) == "--source") {
+		if (std::string(argv[i]) == "-s" || std::string(argv[i]) == "--source") {
 			if (i + 1 < argc) {
 				// map file to memory
 				routine.readFromFile(argv[++i]);
