@@ -106,6 +106,7 @@ bool Lexer::lexStringLiteral(Token &result, std::string::iterator curPtr)
 		pos++;
 		do {
 again:
+			if (curPtr == end) break;
 			c = *curPtr++;
 			// skip escaped double quote 
 			if (c == '"' && *curPtr == '"') {
@@ -114,7 +115,7 @@ again:
 				goto again;
 			}
 			len++;
-		} while (c != '"');
+		} while (c != '"' && curPtr != end);
 		result.setType(tok::stringliteral);
 		result.setValue(getSubStr(pos, len - 1));
 		pos += len;
