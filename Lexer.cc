@@ -25,15 +25,14 @@ bool Lexer::lexIdentifier(Token &result, std::string::iterator curPtr, tok::Toke
 	char c = *curPtr;
 	
 	if (isIdentifierSymbol(c)) {	
-		curPtr++;
 		while (isIdentifierSymbol(c)) {
-			c = *curPtr++;
+			c = *(curPtr + 1);
+			curPtr++;
 			len++;
 		}	
 		result.setType(type);
 		result.setValue(getSubStr(pos, len));
 		// return iterator one symbol back
-		curPtr--;
 		pos += len;
 		col += len;
 		cur = curPtr;
@@ -48,24 +47,24 @@ bool Lexer::lexNumber(Token &result, std::string::iterator curPtr)
 	char c = *curPtr;
 
 	if (isNumericSymbol(c)) {
-		curPtr++;
 		while (isNumericSymbol(c)) {
-			c = *curPtr++;
+			c = *(curPtr + 1);
+			curPtr++;
 			len++;	
 		}	
 		// if after period immediatly come a digit
-		// then continue collect digits
-		if ((c == '.') && isNumericSymbol(*curPtr)) {
-			c = *curPtr++;
+		if ((c == '.') && isNumericSymbol(*(curPtr + 1))) {
+			c = *(curPtr + 1);
+			// consume period
 			len++;
 			while (isNumericSymbol(c)) {
-				c = *curPtr++;
+				c = *(curPtr + 1);
+				curPtr++;
 				len++;	
 			}
 		}
 		result.setType(tok::number);
 		result.setValue(getSubStr(pos, len));
-		curPtr--;
 		pos += len;
 		col += len;
 		cur = curPtr;
@@ -80,15 +79,14 @@ bool Lexer::lexComment(Token &result, std::string::iterator curPtr)
 	char c = *curPtr;	
 
 	if (c == ';') {
-		curPtr++;
-		do {
-			c = *curPtr++;
+		while ((c != '\r') && (c != '\n')) {
+			c = *(curPtr + 1);
+			curPtr++;
 			len++;
-		} while ((c != '\r') && (c != '\n'));
+		}
 		result.setType(tok::comment);
 		result.setValue(getSubStr(pos, len));
 		// return curPtr to \n symbol
-		curPtr--;
 		pos += len;
 		col += len;
 		cur = curPtr;
@@ -106,17 +104,19 @@ bool Lexer::lexStringLiteral(Token &result, std::string::iterator curPtr)
 		curPtr++;
 		pos++;
 		do {
+again:
 			c = *curPtr++;
 			// skip escaped double quote 
-			if (c == '\\' && *curPtr == '"') {
+			if (c == '"' && *curPtr == '"') {
 				curPtr++;
-				len++;
+				len += 2;
+				goto again;
 			}
 			len++;
 		} while (c != '"');
 		result.setType(tok::stringliteral);
 		result.setValue(getSubStr(pos, len - 1));
-		pos += len ;
+		pos += len;
 		col += len;
 		cur = curPtr;
 		return true;
@@ -296,7 +296,6 @@ scan_again:
 	case '=':
 		type = tok::equal;
 		break;
-	// in mumps language space has a meaning
 	case ' ':
 		type = tok::space;
 		break;
