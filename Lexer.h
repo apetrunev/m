@@ -25,6 +25,7 @@ private:
 	bool lexStringLiteral(Token &result, std::string::iterator curPtr);
 	bool isAtLineStart() { return col == 0; }
 	bool isEof() { return cur == end; }
+	bool isEof(std::string::iterator it) { return cur == end; }
 	std::string getSubStr(unsigned start, unsigned end) { return mSource.source.substr(start, end); }
 	bool isIdentifierSymbol(char c);
 	bool isNumericSymbol(char c);
