@@ -56,6 +56,7 @@ bool Lexer::lexNumber(Token &result, std::string::iterator curPtr)
 		if ((c == '.') && isNumericSymbol(*(curPtr + 1))) {
 			c = *(curPtr + 1);
 			// consume period
+			curPtr++;
 			len++;
 			while (isNumericSymbol(c)) {
 				c = *(curPtr + 1);
