@@ -22,13 +22,17 @@ bool Lexer::isNumericSymbol(char c)
 bool Lexer::lexIdentifier(Token &result, std::string::iterator curPtr, tok::TokenType type)
 {
 	unsigned len = 0;
+	
+	if (isEof(curPtr)) return false;
+		
 	char c = *curPtr;
 	
 	if (isIdentifierSymbol(c)) {	
 		while (isIdentifierSymbol(c)) {
-			c = *(curPtr + 1);
-			curPtr++;
 			len++;
+			curPtr++;
+			if (isEof(curPtr)) break;
+			c = *curPtr;
 		}	
 		result.setType(type);
 		result.setValue(getSubStr(pos, len));
