@@ -48,13 +48,17 @@ bool Lexer::lexIdentifier(Token &result, std::string::iterator curPtr, tok::Toke
 bool Lexer::lexNumber(Token &result, std::string::iterator curPtr)
 {
 	unsigned len = 0;
+	
+	if (isEof(curPtr)) return false;
+	
 	char c = *curPtr;
 
 	if (isNumericSymbol(c)) {
 		while (isNumericSymbol(c)) {
-			c = *(curPtr + 1);
-			curPtr++;
-			len++;	
+			len++;
+			curPtr++;	
+			if (isEof(curPtr)) goto number;
+			c = *curPtr;
 		}	
 		// if after period immediatly come a digit
 		if ((c == '.') && isNumericSymbol(*(curPtr + 1))) {
@@ -68,6 +72,7 @@ bool Lexer::lexNumber(Token &result, std::string::iterator curPtr)
 				len++;	
 			}
 		}
+number:
 		result.setType(tok::number);
 		result.setValue(getSubStr(pos, len));
 		pos += len;
