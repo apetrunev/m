@@ -31,6 +31,12 @@ private:
 	bool isNumericSymbol(char c);
 	void skipSpaces();
 	void nextChar() { pos++; cur++; col++; }
+	bool peekChar(std::string::iterator it, char &c)
+	{ 
+		if (isEof(it)) return false;
+		c = *it;
+		return true;
+	}
 private:
 	Routine &mSource;
 	// number of lines of code

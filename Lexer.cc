@@ -165,11 +165,18 @@ do_string:
  
 void Lexer::skipSpaces()
 {
-	if ((*cur == '\r') && (*(cur + 1) == '\n')) { 
-		cur += 2;
-		pos += 2;
-		line++;
-		col = 0;
+	if (isEof(cur)) return;
+
+	if (*cur == '\r') {
+		cur++;
+		pos++;
+		if (isEof(cur)) return;
+		if (*cur == '\n') {
+			cur++;
+			pos++;
+			line++;
+			col = 0;
+		}
 	} else if (*cur == '\n') {
 		cur++;
 		pos++;
@@ -209,32 +216,34 @@ scan_again:
 		type = tok::minus;
 		break;
 	case '*':
-		c = *(cur + 1);
-		if (c == '*') {
-			nextChar();
-			type = tok::starstar;
-			break;
+		if (peekChar(cur + 1, c)) {
+			if (c == '*') {
+				nextChar();
+				type = tok::starstar;
+				break;
+			}
 		}
 		type = tok::star;
 		break;
 	case '\'':
-		c = *(cur + 1);
-		if (c == '<') {
-			nextChar();
-			type = tok::s_quoteless;
-			break;
-		} else if (c == '=') {
-			nextChar();
-			type = tok::s_quoteequal;
-			break;
-		} else if (c == '>') {
-			nextChar();
-			type = tok::s_quotegreater;
-			break;
-		} else if (c == ']') {
-			nextChar();
-			type = tok::s_quoter_square;
-			break;
+		if (peekChar(cur + 1, c)) {
+			if (c == '<') {
+				nextChar();
+				type = tok::s_quoteless;
+				break;
+			} else if (c == '=') {
+				nextChar();
+				type = tok::s_quoteequal;
+				break;
+			} else if (c == '>') {
+				nextChar();
+				type = tok::s_quotegreater;
+				break;
+			} else if (c == ']') {
+				nextChar();
+				type = tok::s_quoter_square;
+				break;
+			}
 		}	
 		type = tok::s_quote;
 		break;
@@ -256,20 +265,22 @@ scan_again:
 		type = tok::r_parenth;
 		break;
 	case '<':	
-		c = *(cur + 1);
-		if (c == '=') {
-			nextChar();
-			type = tok::lessequal;
-			break;
+		if (peekChar(cur + 1, c)) {
+			if (c == '=') {
+				nextChar();
+				type = tok::lessequal;
+				break;
+			}
 		}
 		type = tok::less;
 		break;
 	case '>':
-		c = *(cur + 1);
-		if (c == '=') {
-			nextChar();
-			type = tok::greaterequal;
-			break;
+		if (peekChar(cur + 1, c)) {
+			if (c == '=') {
+				nextChar();
+				type = tok::greaterequal;
+				break;
+			}
 		}
 		type = tok::greater;
 		break;
@@ -288,20 +299,22 @@ scan_again:
 		type = tok::at;
 		break;
 	case '&':
-		c = *(cur + 1);
-		if (c == '&') {
-			nextChar();
-			type = tok::ampamp;
-			break;
+		if (peekChar(cur + 1, c)) {
+			if (c == '&') {
+				nextChar();
+				type = tok::ampamp;
+				break;
+			}
 		}
 		type = tok::amp;
 		break;
 	case '|':
-		c = *(cur + 1);
-		if (c == '|') {
-			nextChar();
-			type = tok::pipepipe;
-			break;
+		if (peekChar(cur + 1, c)) {
+			if (c == '|') {
+				nextChar();
+				type = tok::pipepipe;
+				break;
+			}
 		}
 		type = tok::pipe;
 		break;
@@ -309,11 +322,12 @@ scan_again:
 		type = tok::hash;
 		break;
 	case '$':
-		c = *(cur + 1);
-		if (c == '$') {
-			nextChar();
-			type = tok::dollardollar;
-			break;
+		if (peekChar(cur + 1, c)) {
+			if (c == '$') {
+				nextChar();
+				type = tok::dollardollar;
+				break;
+			}
 		}
 		type = tok::dollar;
 		break;

@@ -12,27 +12,32 @@ int main(int argc, char* argv[])
 	char c = *cur;
 	
 	if (c == '"') {
-		// get string literal 
-		// move further
-		cur++;
-		pos++;
+		len++;
+		cur++;	
 		do {
 again:
-			if (cur == end) 
-				break;
-		
-			c = *cur++;
-			std::cout << c<< std::endl;
-			if (c == '"' && *cur == '"') {
+			if (cur == end) goto do_string;
+			c = *cur;
+			if (c == '"') {
+				len++;
 				cur++;
-				len += 2;
-				goto again;
+				if (cur == end) goto do_string;
+				char next = *cur;
+				if (next == '"') {
+					len++;
+					cur++;
+					goto again;
+				} else {
+					// return back
+					break;
+				}
+			} else {
+				len++;
+				cur++;
 			}
-			len++;			
-		} while (c != '"' || cur != end);
-
-		result = str.substr(pos, len);
-		std::cout << result << std::endl;	
+		} while (c != '"');
+do_string:
+		std::cout << str.substr(pos, len) << std::endl;
 	}
 	
 	return 0;
