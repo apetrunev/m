@@ -57,22 +57,33 @@ bool Lexer::lexNumber(Token &result, std::string::iterator curPtr)
 		while (isNumericSymbol(c)) {
 			len++;
 			curPtr++;	
-			if (isEof(curPtr)) goto number;
+			if (isEof(curPtr)) goto do_number;
 			c = *curPtr;
-		}	
-		// if after period immediatly come a digit
-		if ((c == '.') && isNumericSymbol(*(curPtr + 1))) {
-			c = *(curPtr + 1);
-			// consume period
-			curPtr++;
-			len++;
-			while (isNumericSymbol(c)) {
-				c = *(curPtr + 1);
-				curPtr++;
-				len++;	
-			}
 		}
-number:
+		if (c == '.') {
+			curPtr++;
+			if (isEof(curPtr)) {
+				// return period to lexer
+				curPtr--;
+				goto do_number;
+			}
+			// floating point number
+			if (isNumericSymbol(*curPtr)) {
+				// consume period
+				len++;
+				c = *curPtr;
+				while (isNumericSymbol(c)) {
+					len++;
+					curPtr++;	
+					if (isEof(curPtr)) break;
+					c = *curPtr;
+				}
+			} else {
+				// return period to lexer
+				curPtr--;
+			}
+		}	
+do_number:
 		result.setType(tok::number);
 		result.setValue(getSubStr(pos, len));
 		pos += len;
@@ -86,17 +97,20 @@ number:
 bool Lexer::lexComment(Token &result, std::string::iterator curPtr)
 {
 	unsigned len = 0;
+
+	if (isEof(curPtr)) return false;
+
 	char c = *curPtr;	
 
 	if (c == ';') {
 		while ((c != '\r') && (c != '\n')) {
-			c = *(curPtr + 1);
-			curPtr++;
 			len++;
+			curPtr++;
+			if (isEof(curPtr)) break;
+			c = *curPtr;
 		}
 		result.setType(tok::comment);
 		result.setValue(getSubStr(pos, len));
-		// return curPtr to \n symbol
 		pos += len;
 		col += len;
 		cur = curPtr;
@@ -108,25 +122,39 @@ bool Lexer::lexComment(Token &result, std::string::iterator curPtr)
 bool Lexer::lexStringLiteral(Token &result, std::string::iterator curPtr)
 {
 	unsigned len = 0;
+		
+	if (isEof(curPtr)) return false;
+
 	char c = *curPtr;
-	
+
 	if (c == '"') {
+		len++;
 		curPtr++;
-		pos++;
 		do {
 again:
-			if (curPtr == end) break;
-			c = *curPtr++;
-			// skip escaped double quote 
-			if (c == '"' && *curPtr == '"') {
+			if (isEof(curPtr)) goto do_string;
+			c = *curPtr;	
+			if (c == '"') {
+				// consume double qoute
+				len++;
 				curPtr++;
-				len += 2;
-				goto again;
+				if (isEof(curPtr)) goto do_string;
+				char peek = *curPtr;
+				// escaped double quote `""'
+				if (peek == '"') {
+					// consume escaped double quote
+					len++;
+					curPtr++;
+					goto again;
+				}
+			} else {
+				len++;
+				curPtr++;
 			}
-			len++;
-		} while (c != '"' && curPtr != end);
+		} while (c != '"');
+do_string:
 		result.setType(tok::stringliteral);
-		result.setValue(getSubStr(pos, len - 1));
+		result.setValue(getSubStr(pos, len));
 		pos += len;
 		col += len;
 		cur = curPtr;
@@ -309,6 +337,9 @@ scan_again:
 		break;
 	case ' ':
 		type = tok::space;
+		break;
+	case '?':
+		type = tok::question;
 		break;
 	case '\t':
 		type = tok::tab;
